@@ -21,10 +21,10 @@ def get_product_data():
 def get_price_recommendation():
     return jsonify({"products": data_processing.list_price_recomendation()})
     
-@app.route("/api/process/populate_data", methods=["GET"])
-def get_populate_data():   
+@app.route("/api/process/populate_data/all", methods=["GET"])
+def get_populate_data_all():   
     try:
-        crawl.populate_data()
+        crawl.populate_data_all()
 
         return make_response(jsonify({"response": "success"}), 200)
     
@@ -130,6 +130,28 @@ def get_clean_data():
 def get_calculate_new_discount():   
     try:
         dummy_model.calculate_new_discount()
+
+        return redirect(url_for('get_price_recommendation'))
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/calculate_new_price/1", methods=["GET"])
+def get_calculate_new_price_1():   
+    try:
+        dummy_model.calculate_new_price_history()
+
+        return redirect(url_for('get_price_recommendation'))
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/calculate_new_price/2", methods=["GET"])
+def get_calculate_new_price_2():   
+    try:
+        dummy_model.calculate_new_price_history2()
 
         return redirect(url_for('get_price_recommendation'))
     

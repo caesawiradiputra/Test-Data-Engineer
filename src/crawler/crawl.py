@@ -88,7 +88,7 @@ def scrape_product_info(selectors):
                 category = ""
                 urlDesc = ""
                 e = element.select_one(selectors["detail_href_selector"])
-                if e and e.get("href") != "" and MODE == "Development":
+                if e and e.get("href") != "" and MODE != "Development":
                     try:
                         logging.debug(f"url: {url}")
                         urlDomain = f"https://{urlparse(url).netloc}"
@@ -193,7 +193,7 @@ def list_element_hierarchy(selectors):
         logging.exception(f"An unexpected error occurred for list_elements. Error: {target_element}")
         raise target_element
     
-def populate_data():   
+def populate_data_all():   
     try:
         selectors = {
             "url": "https://www.klikindomaret.com/page/unilever-officialstore",
@@ -224,9 +224,9 @@ def populate_data():
             "description_selector": ".product-features", 
             "category_selector": "span.value[data-testid='descriptionInfoCategory']"
         }
-        # product_data = scrape_product_info(selectors)
-        # product_data = get_product_description(product_data, selectors)
-        # data_processing.parse_and_save_data(product_data)
+        product_data = scrape_product_info(selectors)
+        product_data = get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
 
@@ -242,16 +242,16 @@ def populate_data():
             "description_selector": ".product-features", 
             "category_selector": ".breadcrumb li:nth-last-child(2)"
         }
-        # product_data = scrape_product_info(selectors)
-        # product_data = get_product_description(product_data, selectors)
-        # data_processing.parse_and_save_data(product_data)
+        product_data = scrape_product_info(selectors)
+        product_data = get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
     
 def repopulate_data():
     try:
         data_processing.clean_data()
-        populate_data()
+        populate_data_all()
     
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing data: {e}")
