@@ -2,6 +2,7 @@
 from flask import Flask, jsonify, make_response, render_template, redirect, url_for
 import logging, os
 
+from ..config import SELECTORS
 from ..crawler import crawl
 from ..data_processing import data_processing
 from ..machine_learning import dummy_model
@@ -35,17 +36,7 @@ def get_populate_data_all():
 @app.route("/api/process/populate_data/1", methods=["GET"])
 def get_populate_data_1():   
     try:
-        selectors = {
-            "url": "https://www.klikindomaret.com/page/unilever-officialstore",
-            "product_selector" : ".item", 
-            "product_name_selector": ".title", 
-            "original_price_selector": ".disc-price", 
-            "discount_selector": ".discount", 
-            "price_selector": ".price-value", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": "#desc-product", 
-            "category_selector": ".breadcrumb a:last-of-type"
-        }
+        selectors = SELECTORS["klikindomaret_selector"]
         product_data = crawl.scrape_product_info(selectors)
         product_data = crawl.get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data) 
@@ -59,17 +50,7 @@ def get_populate_data_1():
 @app.route("/api/process/populate_data/2", methods=["GET"])
 def get_populate_data_2():   
     try:
-        selectors = {
-            "url": "https://www.blibli.com/cari/unilever%20indonesia%20official?seller=Official%20Store",
-            "product_selector" : ".product__container", 
-            "product_name_selector": ".blu-product__name", 
-            "original_price_selector": ".blu-product__price-before", 
-            "discount_selector": ".blu-product__price-discount", 
-            "price_selector": ".blu-product__price-after", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": ".product-features", 
-            "category_selector": "span.value[data-testid='descriptionInfoCategory']"
-        }
+        selectors = SELECTORS["blibli_selector"]
         product_data = crawl.scrape_product_info(selectors)
         product_data = crawl.get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data) 
@@ -83,17 +64,7 @@ def get_populate_data_2():
 @app.route("/api/process/populate_data/3", methods=["GET"])
 def get_populate_data_3():   
     try:
-        selectors = {
-            "url": "https://www.tokopedia.com/unilever/product",
-            "product_selector" : ".prd_container-card", 
-            "product_name_selector": ".prd_link-product-name", 
-            "original_price_selector": ".prd_label-product-slash-price", 
-            "discount_selector": ".prd_badge-product-discount", 
-            "price_selector": ".prd_link-product-price", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": ".product-features", 
-            "category_selector": ".breadcrumb li:nth-last-child(2)"
-        }
+        selectors = SELECTORS["tokopedia_selector"]
         product_data = crawl.scrape_product_info(selectors)
         product_data = crawl.get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data) 
@@ -104,10 +75,55 @@ def get_populate_data_3():
         logging.exception(f"An unexpected error occurred while processing data: {e}")
         return make_response(jsonify(e), 500)
     
-@app.route("/api/process/repopulate_data", methods=["GET"])
-def get_repopulate_data():   
+@app.route("/api/process/repopulate_all_data", methods=["GET"])
+def get_repopulate_all_data():   
     try:
-        crawl.repopulate_data()
+        crawl.repopulate_all_data()
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/repopulate_data/1", methods=["GET"])
+def get_repopulate_data_1():   
+    try:
+        data_processing.clean_data()
+        selectors = SELECTORS["klikindomaret_selector"]
+        product_data = crawl.scrape_product_info(selectors)
+        product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/repopulate_data/2", methods=["GET"])
+def get_repopulate_data_2():   
+    try:
+        data_processing.clean_data()
+        selectors = SELECTORS["blibli_selector"]
+        product_data = crawl.scrape_product_info(selectors)
+        product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/repopulate_data/3", methods=["GET"])
+def get_repopulate_data_3():   
+    try:
+        data_processing.clean_data()
+        selectors = SELECTORS["tokopedia_selector"]
+        product_data = crawl.scrape_product_info(selectors)
+        product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
 
         return make_response(jsonify({"response": "success"}), 200)
     
@@ -162,18 +178,7 @@ def get_calculate_new_price_2():
 @app.route("/api/test/crawl_web/1", methods=["GET"])
 def get_crawl_web_1():       
     try:
-        selectors = {
-            "url": "https://www.klikindomaret.com/page/unilever-officialstore",
-            "product_selector" : ".item", 
-            "product_name_selector": ".title", 
-            "original_price_selector": ".disc-price", 
-            "discount_selector": ".discount", 
-            "price_selector": ".price-value", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": "#desc-product", 
-            "category_selector": ".breadcrumb a:last-of-type"
-        }
-
+        selectors = SELECTORS["klikindomaret_selector"]
         product_data = crawl.scrape_product_info(selectors)
         return make_response(jsonify({"product_data": product_data}), 200)
         # data_processing.parse_and_save_data(product_data)
@@ -186,18 +191,7 @@ def get_crawl_web_1():
 @app.route("/api/test/crawl_web/2", methods=["GET"])
 def get_crawl_web_2():       
     try:
-        selectors = {
-            "url": "https://www.blibli.com/cari/unilever%20indonesia%20official?seller=Official%20Store",
-            "product_selector" : ".product__container", 
-            "product_name_selector": ".blu-product__name", 
-            "original_price_selector": ".blu-product__price-before", 
-            "discount_selector": ".blu-product__price-discount", 
-            "price_selector": ".blu-product__price-after", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": ".product-features", 
-            "category_selector": "span.value[data-testid='descriptionInfoCategory']"
-        }
-
+        selectors = SELECTORS["blibli_selector"]
         product_data = crawl.scrape_product_info(selectors)
         return make_response(jsonify({"product_data": product_data}), 200)
         # data_processing.parse_and_save_data(product_data)
@@ -209,19 +203,8 @@ def get_crawl_web_2():
     
 @app.route("/api/test/crawl_web/3", methods=["GET"])
 def get_crawl_web_3():       
-    try:
-        selectors = {
-            "url": "https://www.tokopedia.com/unilever/product",
-            "product_selector" : ".prd_container-card", 
-            "product_name_selector": ".prd_link-product-name", 
-            "original_price_selector": ".prd_label-product-slash-price", 
-            "discount_selector": ".prd_badge-product-discount", 
-            "price_selector": ".prd_link-product-price", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": ".product-features", 
-            "category_selector": ".breadcrumb li:nth-last-child(2)"
-        }
-        
+    try:        
+        selectors = SELECTORS["tokopedia_selector"]
         product_data = crawl.scrape_product_info(selectors)
         return make_response(jsonify({"product_data": product_data}), 200)
         # data_processing.parse_and_save_data(product_data)

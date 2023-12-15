@@ -10,7 +10,7 @@ import requests, logging
 from datetime import datetime
 import platform
 
-from ..config import MODE
+from ..config import MODE, SELECTORS
 from ..data_processing import data_processing
 
 def get_html_content(url):
@@ -195,17 +195,7 @@ def list_element_hierarchy(selectors):
     
 def populate_data_all():   
     try:
-        selectors = {
-            "url": "https://www.klikindomaret.com/page/unilever-officialstore",
-            "product_selector" : ".item", 
-            "product_name_selector": ".title", 
-            "original_price_selector": ".disc-price", 
-            "discount_selector": ".discount", 
-            "price_selector": ".price-value", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": "#desc-product", 
-            "category_selector": ".breadcrumb a:last-of-type"
-        }
+        selectors = SELECTORS["klikindomaret_selector"]
         product_data = scrape_product_info(selectors)
         product_data = get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data)    
@@ -213,17 +203,7 @@ def populate_data_all():
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
 
     try:
-        selectors = {
-            "url": "https://www.blibli.com/cari/unilever%20indonesia%20official?seller=Official%20Store",
-            "product_selector" : ".product__container", 
-            "product_name_selector": ".blu-product__name", 
-            "original_price_selector": ".blu-product__price-before", 
-            "discount_selector": ".blu-product__price-discount", 
-            "price_selector": ".blu-product__price-after", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": ".product-features", 
-            "category_selector": "span.value[data-testid='descriptionInfoCategory']"
-        }
+        selectors = SELECTORS["blibli_selector"]
         product_data = scrape_product_info(selectors)
         product_data = get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data)
@@ -231,24 +211,14 @@ def populate_data_all():
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
 
     try:
-        selectors = {
-            "url": "https://www.tokopedia.com/unilever/product",
-            "product_selector" : ".prd_container-card", 
-            "product_name_selector": ".prd_link-product-name", 
-            "original_price_selector": ".prd_label-product-slash-price", 
-            "discount_selector": ".prd_badge-product-discount", 
-            "price_selector": ".prd_link-product-price", 
-            "detail_href_selector": "a:first-of-type", 
-            "description_selector": ".product-features", 
-            "category_selector": ".breadcrumb li:nth-last-child(2)"
-        }
+        selectors = SELECTORS["blibli_tokopedia"]
         product_data = scrape_product_info(selectors)
         product_data = get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
     
-def repopulate_data():
+def repopulate_all_data():
     try:
         data_processing.clean_data()
         populate_data_all()
