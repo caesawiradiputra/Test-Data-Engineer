@@ -1,0 +1,51 @@
+version: "3"
+services:
+  database:
+    build:
+      context: .
+      dockerfile: ./src/data_processing/Dockerfile
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin123
+    ports:
+      - "5433:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+    environment:
+      - ENVIRONMENT=prod
+
+  # crawler:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/crawler/Dockerfile
+  #   depends_on:
+  #     - database
+
+  # data_processing:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/data_processing/Dockerfile
+  #   depends_on:
+  #     - database
+
+  # machine_learning:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/machine_learning/Dockerfile
+  #   depends_on:
+  #     - database
+
+  # api:
+  #   build:
+  #     context: .
+  #     dockerfile: ./src/api/Dockerfile
+  #   depends_on:
+  #     - database
