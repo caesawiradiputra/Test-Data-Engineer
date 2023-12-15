@@ -75,7 +75,7 @@ def get_populate_data_3():
         logging.exception(f"An unexpected error occurred while processing data: {e}")
         return make_response(jsonify(e), 500)
     
-@app.route("/api/process/repopulate_all_data", methods=["GET"])
+@app.route("/api/process/repopulate_data/all", methods=["GET"])
 def get_repopulate_all_data():   
     try:
         crawl.repopulate_all_data()
