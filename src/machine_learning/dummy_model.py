@@ -25,7 +25,7 @@ def calculate_new_discount():
         for product in products:
             if random.choice([True, False]):
                 recommendation_percentage = round(random.uniform(0.02, 0.2) * 100)
-                recommended_price = round(float(product[2]) * float(1-recommendation_percentage/100), 0)
+                recommended_price = round(float(product[3]) * float(100-recommendation_percentage) / 100, 0)
 
             else:
                 recommended_price = None
