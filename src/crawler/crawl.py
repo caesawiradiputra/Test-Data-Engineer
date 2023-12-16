@@ -6,14 +6,14 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import urljoin, urlparse
-import requests, logging
+import requests, logging, time
 from datetime import datetime
 import platform
 
 from ..config import MODE, SELECTORS
 from ..data_processing import data_processing
 
-def get_html_content(url, selectors):
+def get_html_content(url, selector, blnScroll=False):
     parsed_url = urlparse(url).netloc
     domain = parsed_url.split('.')[1]
     logging.debug(f"url : {url}")
@@ -21,7 +21,8 @@ def get_html_content(url, selectors):
     logging.debug(f"domain : {domain}")
     logging.debug(f"MODE : {MODE}")
     # Function to get HTML content based on mode
-    if MODE == "Development":
+    start_time = time.time()
+    if MODE == "Testing":
         html_file_path = f"./test/{domain}.html"
         try:
             with open(html_file_path, "r", encoding="utf-8") as html_file:
@@ -49,14 +50,22 @@ def get_html_content(url, selectors):
                 driver = webdriver.Firefox(service=firefox_service_obj, options=firefox_options)
 
             driver.get(url)
-            wait = WebDriverWait(driver, 300)
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selectors["product_selector"])))
+            wait = WebDriverWait(driver, 30)
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selector)))
+            if blnScroll:
+                logging.info(f"Scrolling until the end of web : {url}")
+                for i in range(3):
+                    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+                    time.sleep(1)
             html_content = driver.page_source
             driver.quit()
-            logging.info(f"Successfully fetched HTML content from: {url}")
+
+            execution_time = time.time() - start_time
+            logging.info(f"Successfully fetched HTML content from: {url}, in: {execution_time} seconds")
             return html_content
         except Exception as e:
-            logging.exception(f"Failed to fetch HTML content. Error: {e}")
+            if start_time: execution_time = time.time() - start_time
+            logging.exception(f"Failed to fetch HTML content. Error: {e}, after: {execution_time} seconds")
             raise e        
 
 def scrape_product_info(selectors):
@@ -64,8 +73,10 @@ def scrape_product_info(selectors):
         # product_selector, product_name_selector, original_price_selector, discount_selector, price_selector, detail_href_selector, description_selector, category_selector = selectors
 
         url = selectors["url"]
-        html_content = get_html_content(url, selectors)        
+        html_content = get_html_content(url, selectors["web_selector"], True)    
+        # html_content = get_html_content(url, "*", True)       
         logging.info(f"Attempting to scrape HTML content from: {url}")
+        start_time = time.time()
 
         soup = BeautifulSoup(html_content, "html.parser")
 
@@ -87,10 +98,10 @@ def scrape_product_info(selectors):
 
             if product_name and price:
                 description = ""
-                category = ""
-                urlDesc = ""
+                category = url.split(".")[1]
+                urlDesc = None
                 e = element.select_one(selectors["detail_href_selector"])
-                if e and e.get("href") != "" and MODE != "Development":
+                if e and e.get("href") != "":
                     try:
                         logging.debug(f"url: {url}")
                         urlDomain = f"https://{urlparse(url).netloc}"
@@ -102,9 +113,6 @@ def scrape_product_info(selectors):
                         # urlDesc = f"https://{urlparse(url).netloc}{e.get('href')}"
                     except Exception as e:
                         logging.exception(f"An unexpected error occurred for parsing URL: {urlDesc}. Error: {e}")
-                        category = url.split(".")[1]
-                else:
-                    category = url.split(".")[1]
 
                 if original_price and discount:
                     original_price = original_price.replace(discount, "").replace("\n", "")
@@ -125,48 +133,112 @@ def scrape_product_info(selectors):
                     "create_date": datetime.now()
                     })
 
-        logging.info(f"Successfully scrape HTML content from: {url}")
+        execution_time = time.time() - start_time
+        logging.info(f"Successfully scrape HTML content from: {url}, in: {execution_time} seconds")
         return product_data
 
     except Exception as e:
         if html_content: logging.error(f"Error processing html_content: {html_content}")
-        logging.exception(f"An unexpected error occurred for URL: {url}. Error: {e}")
+        if start_time: execution_time = time.time() - start_time
+        logging.exception(f"An unexpected error occurred for URL: {url}. Error: {e}, after: {execution_time} seconds")
         raise e
     
-def get_product_description(product_data, selectors):
+def get_product_description2(product_data, selectors):
+    try:
+        start_time = time.time()
+        logging.info(f"Attempting to get product description from: {selectors['url']}")
+        for product in product_data:
+            try:
+                if product["urlDesc"]:
+                    logging.debug(f"Attempting to get product description from: {product['urlDesc']}")
+                    responseDesc = requests.get(product["urlDesc"], timeout=5)
+
+                    if responseDesc.status_code == 200:
+                        logging.debug(f"Desc html_content: {responseDesc.text}")
+                        soupDesc = BeautifulSoup(responseDesc.text, "html.parser")
+
+                        el = soupDesc.select_one(selectors["description_selector"])
+                        logging.debug(f"Desc description selectors: {selectors['description_selector']}")
+                        logging.debug(f"Desc description el: {el}")
+                        description = el.text.strip() if el else None
+                        logging.debug(f"Desc description: {description}")
+                        el = soupDesc.select_one(selectors["category_selector"])
+                        logging.debug(f"Desc description selectors: {selectors['category_selector']}")
+                        logging.debug(f"Desc category el: {el}")
+                        category = el.text.strip() if el else None
+                        logging.debug(f"Desc category: {category}")
+
+                        product["detail"] = description
+                        product["category"] = category
+                    else:
+                        logging.error(f"Failed to fetch url: {product['urlDesc']}.")
+
+            except Exception as e:
+                if responseDesc.text: logging.debug(f"Desc html_content: {responseDesc.text}")
+                logging.error(f"An unexpected error when get product description from: {product['urlDesc']}, error: {e}")
+
+        execution_time = time.time() - start_time
+        logging.info(f"Successfully get product description from: {selectors['url']}, in: {execution_time} seconds")
+        return product_data
+    except Exception as e:
+        if start_time: execution_time = time.time() - start_time
+        logging.exception(f"An unexpected error occurred for URL: {selectors['url']}. Error: {e}, after: {execution_time} seconds")
+        return product_data
     
-    for product in product_data:
-        try:
-            responseDesc = requests.get(product["urlDesc"], timeout=1)
+def get_product_description(product_data, selectors):
+    try:
+        start_time = time.time()
+        logging.info(f"Attempting to get product description from: {selectors['url']}")
+        for product in product_data:
+            try:
+                if product["urlDesc"]:
+                    logging.debug(f"Attempting to get product description from: {product['urlDesc']}")
+                    html_content = get_html_content(product["urlDesc"], selectors["description_selector"])
+                    # logging.debug(f"Desc html_content: {html_content}")
 
-            if responseDesc.status_code == 200:
-                soupDesc = BeautifulSoup(responseDesc.text, "html.parser")
+                    if html_content:
+                        soupDesc = BeautifulSoup(html_content, "html.parser")
 
-                el = soupDesc.select_one(selectors["description_selector"])
-                description = el.text.strip() if el else None
-                last_a_tag = soupDesc.select_one(selectors["category_selector"])
-                category = last_a_tag.text.strip() if last_a_tag else None
+                        el = soupDesc.select_one(selectors["description_selector"])
+                        logging.debug(f"Desc description selectors: {selectors['description_selector']}")
+                        logging.debug(f"Desc description el: {el}")
+                        description = el.text.strip() if el else None
+                        logging.debug(f"Desc description: {description}")
+                        el = soupDesc.select_one(selectors["category_selector"])
+                        logging.debug(f"Desc description selectors: {selectors['category_selector']}")
+                        logging.debug(f"Desc category el: {el}")
+                        category = el.text.strip() if el else None
+                        logging.debug(f"Desc category: {category}")
 
-                product["detail"] = description
-                product["category"] = category
-            else:
-                logging.error(f"Failed to fetch url: {product['urlDesc']}. Status code: {responseDesc.status_code}")
+                        product["detail"] = description
+                        product["category"] = category
+                    else:
+                        logging.error(f"Failed to fetch url: {product['urlDesc']}.")
 
-        except Exception as e:
-            pass
+            except Exception as e:
+                if html_content: logging.debug(f"Desc html_content: {html_content}")
+                logging.error(f"An unexpected error when get product description from: {product['urlDesc']}, error: {e}")
 
-    return product_data
+        execution_time = time.time() - start_time
+        logging.info(f"Successfully get product description from: {selectors['url']}, in: {execution_time} seconds")
+        return product_data
+    except Exception as e:
+        if start_time: execution_time = time.time() - start_time
+        logging.exception(f"An unexpected error occurred for URL: {selectors['url']}. Error: {e}, after: {execution_time} seconds")
+        return product_data
+
     
 def list_element_hierarchy(selectors):
 
     try:
-        html_content = get_html_content(selectors["url"])
+        logging.info(f"Attempting to get list of element from: {selectors['check_element_url']}")
+        html_content = get_html_content(selectors["check_element_url"], selectors["check_element_selector"], True)
 
         soup = BeautifulSoup(html_content, "html.parser")
 
         # Extract prices
         parent_tags = []
-        target_element = soup.select_one(selectors["info_selector"])
+        target_element = soup.select_one(selectors["check_element_selector"])
         
         if target_element:
             if target_element.find_all(recursive=False):
@@ -189,7 +261,9 @@ def list_element_hierarchy(selectors):
             if (target_element.get('id')):
                 parent_tag += f" #{target_element.get('id')}"
 
-            parent_tags.append({selectors["info_selector"] : parent_tag})
+            parent_tags.append({selectors["check_element_selector"] : parent_tag})
+        else:
+            logging.debug(f"html_content: {html_content}")
 
         return parent_tags
 
@@ -201,7 +275,7 @@ def populate_data_all():
     try:
         selectors = SELECTORS["klikindomaret_selector"]
         product_data = scrape_product_info(selectors)
-        product_data = get_product_description(product_data, selectors)
+        # product_data = get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data)    
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
@@ -210,7 +284,7 @@ def populate_data_all():
     try:
         selectors = SELECTORS["blibli_selector"]
         product_data = scrape_product_info(selectors)
-        product_data = get_product_description(product_data, selectors)
+        # product_data = get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
@@ -219,7 +293,7 @@ def populate_data_all():
     try:
         selectors = SELECTORS["blibli_tokopedia"]
         product_data = scrape_product_info(selectors)
-        product_data = get_product_description(product_data, selectors)
+        # product_data = get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")

@@ -38,6 +38,20 @@ def get_populate_data_1():
     try:
         selectors = SELECTORS["klikindomaret_selector"]
         product_data = crawl.scrape_product_info(selectors)
+        # product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/populate_data/1/detail", methods=["GET"])
+def get_populate_data_1_detail():   
+    try:
+        selectors = SELECTORS["klikindomaret_selector"]
+        product_data = crawl.scrape_product_info(selectors)
         product_data = crawl.get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data) 
 
@@ -49,6 +63,20 @@ def get_populate_data_1():
     
 @app.route("/api/process/populate_data/2", methods=["GET"])
 def get_populate_data_2():   
+    try:
+        selectors = SELECTORS["blibli_selector"]
+        product_data = crawl.scrape_product_info(selectors)
+        # product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/populate_data/2/detail", methods=["GET"])
+def get_populate_data_2_detail():   
     try:
         selectors = SELECTORS["blibli_selector"]
         product_data = crawl.scrape_product_info(selectors)
@@ -66,6 +94,20 @@ def get_populate_data_3():
     try:
         selectors = SELECTORS["tokopedia_selector"]
         product_data = crawl.scrape_product_info(selectors)
+        # product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/populate_data/3/detail", methods=["GET"])
+def get_populate_data_3_detail():   
+    try:
+        selectors = SELECTORS["tokopedia_selector"]
+        product_data = crawl.scrape_product_info(selectors)
         product_data = crawl.get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data) 
 
@@ -75,7 +117,7 @@ def get_populate_data_3():
         logging.exception(f"An unexpected error occurred while processing data: {e}")
         return make_response(jsonify(e), 500)
     
-@app.route("/api/process/repopulate_data/all", methods=["GET"])
+@app.route("/api/process/repopulate_data/all/{}", methods=["GET"])
 def get_repopulate_all_data():   
     try:
         crawl.repopulate_all_data()
@@ -88,6 +130,21 @@ def get_repopulate_all_data():
     
 @app.route("/api/process/repopulate_data/1", methods=["GET"])
 def get_repopulate_data_1():   
+    try:
+        data_processing.clean_data()
+        selectors = SELECTORS["klikindomaret_selector"]
+        product_data = crawl.scrape_product_info(selectors)
+        # product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/repopulate_data/1/detail", methods=["GET"])
+def get_repopulate_data_1_detail():   
     try:
         data_processing.clean_data()
         selectors = SELECTORS["klikindomaret_selector"]
@@ -107,6 +164,21 @@ def get_repopulate_data_2():
         data_processing.clean_data()
         selectors = SELECTORS["blibli_selector"]
         product_data = crawl.scrape_product_info(selectors)
+        # product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/repopulate_data/2/detail", methods=["GET"])
+def get_repopulate_data_2_detail():   
+    try:
+        data_processing.clean_data()
+        selectors = SELECTORS["blibli_selector"]
+        product_data = crawl.scrape_product_info(selectors)
         product_data = crawl.get_product_description(product_data, selectors)
         data_processing.parse_and_save_data(product_data) 
 
@@ -118,6 +190,21 @@ def get_repopulate_data_2():
     
 @app.route("/api/process/repopulate_data/3", methods=["GET"])
 def get_repopulate_data_3():   
+    try:
+        data_processing.clean_data()
+        selectors = SELECTORS["tokopedia_selector"]
+        product_data = crawl.scrape_product_info(selectors)
+        # product_data = crawl.get_product_description(product_data, selectors)
+        data_processing.parse_and_save_data(product_data) 
+
+        return make_response(jsonify({"response": "success"}), 200)
+    
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred while processing data: {e}")
+        return make_response(jsonify(e), 500)
+    
+@app.route("/api/process/repopulate_data/3/detail", methods=["GET"])
+def get_repopulate_data_3_detail():   
     try:
         data_processing.clean_data()
         selectors = SELECTORS["tokopedia_selector"]
@@ -217,10 +304,7 @@ def get_crawl_web_3():
 @app.route("/api/test/list_element/1", methods=["GET"])
 def list_element_1():       
     try:
-        selectors = {
-            "url": "https://www.klikindomaret.com/page/unilever-officialstore",
-            "info_selector": ".price-value"
-        }
+        selectors = SELECTORS["klikindomaret_selector"]
 
         elements = crawl.list_element_hierarchy(selectors)
         return make_response(jsonify({"elements": elements}), 200)
@@ -232,10 +316,7 @@ def list_element_1():
 @app.route("/api/test/list_element/2", methods=["GET"])
 def list_element_2():       
     try:
-        selectors = {
-            "url": "https://www.blibli.com/cari/unilever%20indonesia%20official?seller=Official%20Store",
-            "info_selector": ".blu-product__price-after"
-        }
+        selectors = SELECTORS["blibli_selector"]
 
         elements = crawl.list_element_hierarchy(selectors)
         return make_response(jsonify({"elements": elements}), 200)
@@ -247,10 +328,7 @@ def list_element_2():
 @app.route("/api/test/list_element/3", methods=["GET"])
 def list_element_3():       
     try:
-        selectors = {
-            "url": "https://www.tokopedia.com/unilever/product",
-            "info_selector": ".prd_link-product-price"
-        }
+        selectors = SELECTORS["tokopedia_selector"]
 
         elements = crawl.list_element_hierarchy(selectors)
         return make_response(jsonify({"elements": elements}), 200)

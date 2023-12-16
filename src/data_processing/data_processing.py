@@ -1,7 +1,7 @@
 # src/data_processing/data_processing.py
 import psycopg2
 from datetime import datetime
-import logging
+import logging, time
 
 from ..config import CONNECTION_STRING
 
@@ -36,17 +36,28 @@ def clean_data():
 
 def parse_and_save_data(product_data):
     try:
+        start_time = time.time()
+        logging.info(f"Attempting to parse and save data")
         # Connect to the database
         conn = psycopg2.connect(CONNECTION_STRING)
         cursor = conn.cursor()
 
         # Save the crawled data to the database
         for product in product_data:
-            cursor.execute("Select id from product_master where name = %s", (product["name"],))
+            cursor.execute("Select id, detail, type from product_master where name = %s", (product["name"],))
             result = cursor.fetchone()
 
             if result:
                 product_master_id = result[0]
+                # if product.get("detail", "") != "" and product.get("detail", "") != result[1]:
+                #     cursor.execute(
+                #         """
+                #         UPDATE product_master
+                #             SET detail = %s
+                #                 ,type = %s
+                #         WHERE id = %s"
+                #         """, product.get("detail", ""), product.get("category", ""), result[0]
+                #     )
             else:
                 cursor.execute(
                     "INSERT INTO product_master (name, detail, type) VALUES (%s, %s, %s) RETURNING id;",
@@ -77,6 +88,9 @@ def parse_and_save_data(product_data):
         conn.commit()
         cursor.close()
         conn.close()
+
+        execution_time = time.time() - start_time
+        logging.info(f"Successfully parse and save data, in: {execution_time} seconds")
 
     except psycopg2.Error as e:
         logging.error(f"Error connecting to the database: {e}")
