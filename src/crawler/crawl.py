@@ -53,10 +53,11 @@ def get_html_content(url):
             wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".item")))
             html_content = driver.page_source
             driver.quit()
+            logging.info(f"Successfully fetched HTML content from: {url}")
             return html_content
         except Exception as e:
             logging.exception(f"Failed to fetch HTML content. Error: {e}")
-            return None        
+            raise e        
 
 def scrape_product_info(selectors):
     try:
@@ -64,6 +65,7 @@ def scrape_product_info(selectors):
 
         url = selectors["url"]
         html_content = get_html_content(url)        
+        logging.info(f"Attempting to scrape HTML content from: {url}")
 
         soup = BeautifulSoup(html_content, "html.parser")
 
@@ -123,6 +125,7 @@ def scrape_product_info(selectors):
                     "create_date": datetime.now()
                     })
 
+        logging.info(f"Successfully scrape HTML content from: {url}")
         return product_data
 
     except Exception as e:
@@ -146,7 +149,7 @@ def get_product_description(product_data, selectors):
                 product["detail"] = description
                 product["category"] = category
             else:
-                logging.error(f"Failed to fetch url: {urlDesc}. Status code: {responseDesc.status_code}")
+                logging.error(f"Failed to fetch url: {product['urlDesc']}. Status code: {responseDesc.status_code}")
 
         except Exception as e:
             pass
@@ -189,9 +192,9 @@ def list_element_hierarchy(selectors):
 
         return parent_tags
 
-    except Exception as target_element:
-        logging.exception(f"An unexpected error occurred for list_elements. Error: {target_element}")
-        raise target_element
+    except Exception as e:
+        logging.exception(f"An unexpected error occurred for list_elements. Error: {e}")
+        raise e
     
 def populate_data_all():   
     try:
@@ -201,6 +204,7 @@ def populate_data_all():
         data_processing.parse_and_save_data(product_data)    
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
+        raise e
 
     try:
         selectors = SELECTORS["blibli_selector"]
@@ -209,6 +213,7 @@ def populate_data_all():
         data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
+        raise e
 
     try:
         selectors = SELECTORS["blibli_tokopedia"]
@@ -217,6 +222,7 @@ def populate_data_all():
         data_processing.parse_and_save_data(product_data)
     except Exception as e:
         logging.exception(f"An unexpected error occurred while processing URL {selectors['url']}, error: {e}")
+        raise e
     
 def repopulate_all_data():
     try:
