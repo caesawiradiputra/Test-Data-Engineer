@@ -13,7 +13,7 @@ import platform
 from ..config import MODE, SELECTORS
 from ..data_processing import data_processing
 
-def get_html_content(url):
+def get_html_content(url, selectors):
     parsed_url = urlparse(url).netloc
     domain = parsed_url.split('.')[1]
     logging.debug(f"url : {url}")
@@ -50,7 +50,7 @@ def get_html_content(url):
 
             driver.get(url)
             wait = WebDriverWait(driver, 300)
-            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".item")))
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, selectors["product_selector"])))
             html_content = driver.page_source
             driver.quit()
             logging.info(f"Successfully fetched HTML content from: {url}")
@@ -64,7 +64,7 @@ def scrape_product_info(selectors):
         # product_selector, product_name_selector, original_price_selector, discount_selector, price_selector, detail_href_selector, description_selector, category_selector = selectors
 
         url = selectors["url"]
-        html_content = get_html_content(url)        
+        html_content = get_html_content(url, selectors)        
         logging.info(f"Attempting to scrape HTML content from: {url}")
 
         soup = BeautifulSoup(html_content, "html.parser")
