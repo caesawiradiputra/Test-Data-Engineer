@@ -156,7 +156,7 @@ Open a web browser and go to **http://localhost:5000** to access your applicatio
 ```
 
 ## Repopulate Data (All Sites)
-* URL: /api/process/populate_data/all
+* URL: /api/process/repopulate_data/all
 * Method: GET
 * Description: Clean and repopulate data from all three sources (KlikUndomaret, Blibli, Tokopedia).
 * Response:
@@ -167,7 +167,7 @@ Open a web browser and go to **http://localhost:5000** to access your applicatio
 ```
 
 ## Repopulate Data (KlikIndomaret)
-* URL: /api/process/populate_data/1
+* URL: /api/process/repopulate_data/1
 * Method: GET
 * Description: Clean and repopulate data from KlikIndomaret.
 * Response:
@@ -178,7 +178,7 @@ Open a web browser and go to **http://localhost:5000** to access your applicatio
 ```
 
 ## Repopulate Data (Blibli)
-* URL: /api/process/populate_data/2
+* URL: /api/process/repopulate_data/2
 * Method: GET
 * Description: Clean and repopulate data from Blibli.
 * Response:
@@ -189,7 +189,7 @@ Open a web browser and go to **http://localhost:5000** to access your applicatio
 ```
 
 ## Repopulate Data (Tokopedia)
-* URL: /api/process/populate_data/3
+* URL: /api/process/repopulate_data/3
 * Method: GET
 * Description: Clean and repopulate data from Tokopedia.
 * Response:
