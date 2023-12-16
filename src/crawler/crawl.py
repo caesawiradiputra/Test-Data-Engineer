@@ -129,6 +129,7 @@ def scrape_product_info(selectors):
         return product_data
 
     except Exception as e:
+        if html_content: logging.error(f"Error processing html_content: {html_content}")
         logging.exception(f"An unexpected error occurred for URL: {url}. Error: {e}")
         raise e
     
