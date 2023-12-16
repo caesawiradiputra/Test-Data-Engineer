@@ -1,7 +1,3 @@
-# Known Issues
-* Blibli and Tokopedia websites appear to have protections against robots or crawlers, possibly allowing only one crawl per public IP.
-  * For development purposes, the HTML content from each website is copied to an HTML file in the /test folder.
-
 # Running the Application on Windows
 ## Prerequisites
 * Install [Python](https://www.python.org/downloads/) on your system.
@@ -50,6 +46,9 @@ python -m main
 ## Access the Application
 Open a web browser and go to **http://localhost:5000** to access your application.
 
+## Test the API
+Open Postman and navigate to http://localhost:5000/{path_api} to test the application.
+
 ## Stopping the Application
 To stop the application, press Ctrl + C in the terminal where the application is running.
 
@@ -70,6 +69,9 @@ docker-compose up --build
 
 ## Access the Application
 Open a web browser and go to **http://localhost:5000** to access your application.
+
+## Test the API
+Open Postman and navigate to http://localhost:5000/{path_api} to test the application.
 
 # API Documentation
 ## Get Product Data
