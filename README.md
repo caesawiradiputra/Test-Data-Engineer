@@ -75,7 +75,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 
 # API Documentation
 ## Get Product Data
-* URL: /api/get_product_data
+* Endpoint: /api/get_product_data
 * Method: GET
 * Description: Retrieve a list of product data.
 * Response:
@@ -94,7 +94,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Get Price Recommendation
-* URL: /api/get_price_recommendation
+* Endpoint: /api/get_price_recommendation
 * Method: GET
 * Description: Retrieve a list of price recommendations.
 * Response:
@@ -114,7 +114,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Populate Data (All Sites)
-* URL: /api/process/populate_data/all
+* Endpoint: /api/process/populate_data/all
 * Method: GET
 * Description: Populate data from all three sources (KlikUndomaret, Blibli, Tokopedia).
 * Response:
@@ -125,7 +125,8 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Populate Data (KlikIndomaret)
-* URL: /api/process/populate_data/1
+* Endpoint: /api/process/populate_data/1
+  * Detail Endpoint: /api/process/populate_data/1/detail (Includes opening each product link to retrieve description and category)
 * Method: GET
 * Description: Populate data from KlikIndomaret.
 * Response:
@@ -136,7 +137,8 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Populate Data (Blibli)
-* URL: /api/process/populate_data/2
+* Endpoint: /api/process/populate_data/2
+  * Detail Endpoint: /api/process/populate_data/2/detail (Includes opening each product link to retrieve description and category)
 * Method: GET
 * Description: Populate data from Blibli.
 * Response:
@@ -147,7 +149,8 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Populate Data (Tokopedia)
-* URL: /api/process/populate_data/3
+* Endpoint: /api/process/populate_data/3
+  * Detail Endpoint: /api/process/populate_data/3/detail (Includes opening each product link to retrieve description and category)
 * Method: GET
 * Description: Populate data from Tokopedia.
 * Response:
@@ -158,7 +161,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Repopulate Data (All Sites)
-* URL: /api/process/repopulate_data/all
+* Endpoint: /api/process/repopulate_data/all
 * Method: GET
 * Description: Clean and repopulate data from all three sources (KlikUndomaret, Blibli, Tokopedia).
 * Response:
@@ -169,7 +172,8 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Repopulate Data (KlikIndomaret)
-* URL: /api/process/repopulate_data/1
+* Endpoint: /api/process/repopulate_data/1
+  * Detail Endpoint: /api/process/repopulate_data/1/detail (Includes opening each product link to retrieve description and category)
 * Method: GET
 * Description: Clean and repopulate data from KlikIndomaret.
 * Response:
@@ -180,7 +184,8 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Repopulate Data (Blibli)
-* URL: /api/process/repopulate_data/2
+* Endpoint: /api/process/repopulate_data/2
+  * Detail Endpoint: /api/process/repopulate_data/2/detail (Includes opening each product link to retrieve description and category)
 * Method: GET
 * Description: Clean and repopulate data from Blibli.
 * Response:
@@ -191,7 +196,8 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Repopulate Data (Tokopedia)
-* URL: /api/process/repopulate_data/3
+* Endpoint: /api/process/repopulate_data/3
+  * Detail Endpoint: /api/process/repopulate_data/3/detail (Includes opening each product link to retrieve description and category)
 * Method: GET
 * Description: Clean and repopulate data from Tokopedia.
 * Response:
@@ -202,7 +208,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Clean Data
-* URL: /api/process/clean_data
+* Endpoint: /api/process/clean_data
 * Method: GET
 * Description: Clean existing data.
 * Response:
@@ -213,28 +219,28 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Calculate New Discount
-* URL: /api/process/calculate_new_discount
+* Endpoint: /api/process/calculate_new_discount
 * Method: GET
 * Description: Calculate new discount using a dummy model.
 * Response:
   * Redirects to /api/get_price_recommendation
 
 ## Calculate New Price (Based on History)
-* URL: /api/process/calculate_new_price/1
+* Endpoint: /api/process/calculate_new_price/1
 * Method: GET
 * Description: Calculate new price based on historical data.
 * Response:
   * Redirects to /api/get_price_recommendation
 
 ## Calculate New Price (Based on Weight)
-* URL: /api/process/calculate_new_price/2
+* Endpoint: /api/process/calculate_new_price/2
 * Method: GET
 * Description: Calculate new price based on Weight data.
 * Response:
   * Redirects to /api/get_price_recommendation
 
 ## Crawl Web Data (KlikIndomaret)
-* URL: /api/test/crawl_web/1
+* Endpoint: /api/test/crawl_web/1
 * Method: GET
 * Description: Crawl web data from KlikIndomaret.
 * Response:
@@ -257,7 +263,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Crawl Web Data (Blibli)
-* URL: /api/test/crawl_web/2
+* Endpoint: /api/test/crawl_web/2
 * Method: GET
 * Description: Crawl web data from Blibli.
 * Response:
@@ -280,7 +286,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Crawl Web Data (Tokopedia)
-* URL: /api/test/crawl_web/3
+* Endpoint: /api/test/crawl_web/3
 * Method: GET
 * Description: Crawl web data from Tokopedia.
 * Response:
@@ -303,7 +309,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## List Element Hierarchy (KlikIndomaret)
-* URL: /api/test/list_element/1
+* Endpoint: /api/test/list_element/1
 * Method: GET
 * Description: List the hierarchy of HTML elements from KlikIndomaret.
 * Response:
@@ -316,7 +322,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## List Element Hierarchy (Blibli)
-* URL: /api/test/list_element/2
+* Endpoint: /api/test/list_element/2
 * Method: GET
 * Description: List the hierarchy of HTML elements from Blibli.
 * Response:
@@ -329,7 +335,7 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## List Element Hierarchy (Tokopedia)
-* URL: /api/test/list_element/3
+* Endpoint: /api/test/list_element/3
 * Method: GET
 * Description: List the hierarchy of HTML elements from Tokopedia.
 * Response:
@@ -342,14 +348,14 @@ Open Postman and navigate to http://localhost:5000/{path_api} to test the applic
 ```
 
 ## Show Log
-* URL: /api/log
+* Endpoint: /api/log
 * Method: GET
 * Description: Show the contents of the log file.
 * Response:
  * Renders the log content.
 
 ## Clean Log
-* URL: /api/log/clean_log
+* Endpoint: /api/log/clean_log
 * Method: GET
 * Description: Clean the log file and redirect to /api/log.
 * Response
