@@ -6,7 +6,7 @@ from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from urllib.parse import urljoin, urlparse
-import requests, logging, time
+import requests, logging, time, re
 from datetime import datetime
 import platform
 
@@ -97,8 +97,8 @@ def scrape_product_info(selectors):
             price = e.text.strip() if e else None
 
             if product_name and price:
-                description = ""
-                category = url.split(".")[1]
+                detail = ""
+                category = ""
                 urlDesc = None
                 e = element.select_one(selectors["detail_href_selector"])
                 if e and e.get("href") != "":
@@ -121,17 +121,20 @@ def scrape_product_info(selectors):
                 original_price = float(original_price.replace("Rp", "").replace(".", "").strip()) if original_price else None
                 discount = float(discount.replace("%", "").strip()) if discount else None
 
+                detail = get_product_detail(product_name)
+
                 product_data.append({
                     "name": product_name, 
                     "original_price": original_price, 
                     "price": price, 
                     "discount_percentage": discount, 
-                    "detail": description, 
+                    "detail": detail, 
                     "category": category,
                     "platform": urlparse(url).netloc,
                     "urlDesc": urlDesc,
                     "create_date": datetime.now()
                     })
+                # break
 
         execution_time = time.time() - start_time
         logging.info(f"Successfully scrape HTML content from: {url}, in: {execution_time} seconds")
@@ -142,6 +145,28 @@ def scrape_product_info(selectors):
         if start_time: execution_time = time.time() - start_time
         logging.exception(f"An unexpected error occurred for URL: {url}. Error: {e}, after: {execution_time} seconds")
         raise e
+    
+def get_product_detail(product_name):
+    # detail_pattern = r'(\d+(\.\d+)?)\s*[Xx]\s*\d+\s*[mMlLgG]$|(\d+(\.\d+)?)\s*[mM]+[lL]|(\d+(\.\d+)?)\s*[gG]\b|(\d+(\.\d+)?)\s*[kK]+[gG]'
+
+    details = []
+
+    # Define a regular expression pattern to match the numbers with optional decimal values
+    pattern = r'(\d+(\.\d+)?)\s*([Xx])\s*(\d+)\s*([mMlLgG])|(\d+(\.\d+)?)\s*([lLgG])|(\d+(\.\d+)?)\s*([mM][lL])|(\d+(\.\d+)?)\s*([kK][gG])'
+    
+    # Find all matches in the product name
+    matches = re.findall(pattern, product_name)
+    details.extend(matches)
+    
+    # Print the extracted details
+    detail_str = ""
+    for detail in details:
+        detail_str = ''.join(filter(None, detail))  # Remove None values
+        
+    if detail_str: 
+        detail_str = re.sub(r'\.(\d+)', "", detail_str, 1)
+        logging.debug(f"detail_str: {detail_str}")
+    return detail_str
     
 def get_product_description2(product_data, selectors):
     try:
@@ -193,24 +218,24 @@ def get_product_description(product_data, selectors):
             try:
                 if product["urlDesc"]:
                     logging.debug(f"Attempting to get product description from: {product['urlDesc']}")
-                    html_content = get_html_content(product["urlDesc"], selectors["description_selector"])
+                    html_content = get_html_content(product["urlDesc"], selectors["category_selector"])
                     # logging.debug(f"Desc html_content: {html_content}")
 
                     if html_content:
                         soupDesc = BeautifulSoup(html_content, "html.parser")
 
-                        el = soupDesc.select_one(selectors["description_selector"])
-                        logging.debug(f"Desc description selectors: {selectors['description_selector']}")
-                        logging.debug(f"Desc description el: {el}")
-                        description = el.text.strip() if el else None
-                        logging.debug(f"Desc description: {description}")
+                        # el = soupDesc.select_one(selectors["description_selector"])
+                        # logging.debug(f"Desc description selectors: {selectors['description_selector']}")
+                        # logging.debug(f"Desc description el: {el}")
+                        # description = el.text.strip() if el else None
+                        # logging.debug(f"Desc description: {description}")
                         el = soupDesc.select_one(selectors["category_selector"])
                         logging.debug(f"Desc description selectors: {selectors['category_selector']}")
                         logging.debug(f"Desc category el: {el}")
                         category = el.text.strip() if el else None
                         logging.debug(f"Desc category: {category}")
 
-                        product["detail"] = description
+                        # product["detail"] = description
                         product["category"] = category
                     else:
                         logging.error(f"Failed to fetch url: {product['urlDesc']}.")
